@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Threading;
 using System.Runtime.InteropServices;
 using System.Linq.Expressions;
+using System.Security.Cryptography.X509Certificates;
 ///█ ■
 ////https://www.youtube.com/watch?v=SGZgvMwjq2U
 namespace Snake
@@ -14,47 +15,20 @@ namespace Snake
 	{
 		static void Main(string[] args)
 		{
-			// variable init
-			Console.WindowHeight = 16;
-			Console.WindowWidth = 32;
-			int screenWidth = Console.WindowWidth;
-			int screenHeight = Console.WindowHeight;
+            Screen mainScreen = new Screen(32,16);
 			Random randomNumber = new Random();
 			int score = 5;
 			bool gameOver = false;
 
-            Pixel snakeHead = new Pixel(screenWidth / 2, screenHeight / 2, ConsoleColor.Red);
-			string snakeMoveDirection = "RIGHT";
+            Snake snake1 = new Snake(mainScreen);
 			List<int> snakeBodyXPos = new List<int>();
 			List<int> snakeBodyYPos = new List<int>();
-			int berryXPos = randomNumber.Next(0, screenWidth);
-			int berryYPos = randomNumber.Next(0, screenHeight);
+			int berryXPos = randomNumber.Next(0, mainScreen.ScreenWidth);
+			int berryYPos = randomNumber.Next(0, mainScreen.ScreenHeight);
 			DateTime actionTimerStartingTime = DateTime.Now;
 			DateTime actionTimerCurrentTime = DateTime.Now;
 			string buttonPressed = "no";
 
-			void createBorders() {
-                for (int i = 0; i < screenWidth; i++)
-                {
-                    Console.SetCursorPosition(i, 0);
-                    Console.Write("■");
-                }
-                for (int i = 0; i < screenWidth; i++)
-                {
-                    Console.SetCursorPosition(i, screenHeight - 1);
-                    Console.Write("■");
-                }
-                for (int i = 0; i < screenHeight; i++)
-                {
-                    Console.SetCursorPosition(0, i);
-                    Console.Write("■");
-                }
-                for (int i = 0; i < screenHeight; i++)
-                {
-                    Console.SetCursorPosition(screenWidth - 1, i);
-                    Console.Write("■");
-                }
-            }
 			void snakeDeathCheck()
 			{
                 if (snakeHead.XPos == screenWidth - 1 || snakeHead.XPos == 0 || snakeHead.YPos == screenHeight - 1 || snakeHead.YPos == 0)
@@ -111,24 +85,24 @@ namespace Snake
                     {
                         ConsoleKeyInfo toets = Console.ReadKey(true);
                         //Console.WriteLine(toets.Key.ToString());
-                        if (toets.Key.Equals(ConsoleKey.UpArrow) && snakeMoveDirection != "DOWN" && buttonPressed == "no")
+                        if (toets.Key.Equals(ConsoleKey.UpArrow) && snake1.snakeMoveDirection != "DOWN" && buttonPressed == "no")
                         {
-                            snakeMoveDirection = "UP";
+                            snake1.snakeMoveDirection = "UP";
                             buttonPressed = "yes";
                         }
-                        if (toets.Key.Equals(ConsoleKey.DownArrow) && snakeMoveDirection != "UP" && buttonPressed == "no")
+                        if (toets.Key.Equals(ConsoleKey.DownArrow) && snake1.snakeMoveDirection != "UP" && buttonPressed == "no")
                         {
-                            snakeMoveDirection = "DOWN";
+                            snake1.snakeMoveDirection = "DOWN";
                             buttonPressed = "yes";
                         }
-                        if (toets.Key.Equals(ConsoleKey.LeftArrow) && snakeMoveDirection != "RIGHT" && buttonPressed == "no")
+                        if (toets.Key.Equals(ConsoleKey.LeftArrow) && snake1.snakeMoveDirection != "RIGHT" && buttonPressed == "no")
                         {
-                            snakeMoveDirection = "LEFT";
+                            snake1.snakeMoveDirection = "LEFT";
                             buttonPressed = "yes";
                         }
-                        if (toets.Key.Equals(ConsoleKey.RightArrow) && snakeMoveDirection != "LEFT" && buttonPressed == "no")
+                        if (toets.Key.Equals(ConsoleKey.RightArrow) && snake1.snakeMoveDirection != "LEFT" && buttonPressed == "no")
                         {
-                            snakeMoveDirection = "RIGHT";
+                            snake1.snakeMoveDirection = "RIGHT";
                             buttonPressed = "yes";
                         }
                     }
@@ -136,21 +110,21 @@ namespace Snake
             }
             void snakeMoveExecution()
             {
-                snakeBodyXPos.Add(snakeHead.XPos);
-                snakeBodyYPos.Add(snakeHead.YPos);
-                switch (snakeMoveDirection)
+                snakeBodyXPos.Add(snake1.XPos);
+                snakeBodyYPos.Add(snake1.YPos);
+                switch (snake1.snakeMoveDirection)
                 {
                     case "UP":
-                        snakeHead.YPos--;
+                        snake1.YPos--;
                         break;
                     case "DOWN":
-                        snakeHead.YPos++;
+                        snake1.YPos++;
                         break;
                     case "LEFT":
-                        snakeHead.XPos--;
+                        snake1.XPos--;
                         break;
                     case "RIGHT":
-                        snakeHead.XPos++;
+                        snake1.XPos++;
                         break;
                 }
 
@@ -171,11 +145,11 @@ namespace Snake
 			{
 				Console.Clear();
 				snakeDeathCheck();
-				createBorders();
+				mainScreen.createBorders();
 				eatingCheck();
 				snakeBodyLoop();
 				if (gameOver) { break; }
-                snakeHead.draw();
+                
 				berryDraw();
                 snakeMoveKeyInput();
                 snakeMoveExecution();
@@ -204,16 +178,54 @@ namespace Snake
             }
 		}
 
+        class Screen
+        {
+            public int ScreenWidth {  get; set; }
+            public int ScreenHeight { get; set; }
+            public Screen(int screenWidth, int screenHeight) {ScreenWidth = screenWidth; ScreenHeight = screenHeight; }
+            public void screenSetup()
+            {
+                Console.WindowWidth = ScreenWidth;
+                Console.WindowHeight = ScreenHeight;
+                createBorders();
+            }
+
+            public void createBorders()
+            {
+                for (int i = 0; i < ScreenWidth; i++)
+                {
+                    Console.SetCursorPosition(i, 0);
+                    Console.Write("■");
+                }
+                for (int i = 0; i < ScreenWidth; i++)
+                {
+                    Console.SetCursorPosition(i, ScreenHeight - 1);
+                    Console.Write("■");
+                }
+                for (int i = 0; i < ScreenHeight; i++)
+                {
+                    Console.SetCursorPosition(0, i);
+                    Console.Write("■");
+                }
+                for (int i = 0; i < ScreenHeight; i++)
+                {
+                    Console.SetCursorPosition(ScreenWidth - 1, i);
+                    Console.Write("■");
+                }
+            }
+        }
+
         class Snake
         {
             public int XPos { get; set; }
             public int YPos { get; set; }
-            public Snake(int screenWidth, int screenHeight)
+            public string snakeMoveDirection { get; set; }
+            public Snake(Screen screen)
             {
-                XPos = screenWidth / 2;
-                YPos = screenHeight / 2;
+                snakeMoveDirection = "RIGHT";
+                XPos = screen.ScreenWidth / 2;
+                YPos = screen.ScreenHeight / 2;
                 Pixel snakeHead = new Pixel(XPos, YPos, ConsoleColor.Red);
-
             }
         }
 
