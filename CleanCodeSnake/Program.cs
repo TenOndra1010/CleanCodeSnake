@@ -1,240 +1,252 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Threading;
-using System.Runtime.InteropServices;
-using System.Linq.Expressions;
-using System.Security.Cryptography.X509Certificates;
-///█ ■
-////https://www.youtube.com/watch?v=SGZgvMwjq2U
+
 namespace Snake
 {
-	class Program
-	{
-		static void Main(string[] args)
-		{
-            Screen mainScreen = new Screen(32,16);
-			Random randomNumber = new Random();
-			int score = 5;
-			bool gameOver = false;
-
-            Snake snake1 = new Snake(mainScreen);
-			List<int> snakeBodyXPos = new List<int>();
-			List<int> snakeBodyYPos = new List<int>();
-			int berryXPos = randomNumber.Next(0, mainScreen.ScreenWidth);
-			int berryYPos = randomNumber.Next(0, mainScreen.ScreenHeight);
-			DateTime actionTimerStartingTime = DateTime.Now;
-			DateTime actionTimerCurrentTime = DateTime.Now;
-			string buttonPressed = "no";
-
-			void snakeDeathCheck()
-			{
-                if (snakeHead.XPos == screenWidth - 1 || snakeHead.XPos == 0 || snakeHead.YPos == screenHeight - 1 || snakeHead.YPos == 0)
-                {
-                    gameOver = true;
-                }
-            }
-			void eatingCheck()
-			{
-                if (berryXPos == snakeHead.XPos && berryYPos == snakeHead.YPos)
-                {
-                    //... add points and create a new berry
-                    score++;
-                    berryXPos = randomNumber.Next(1, screenWidth - 2);
-                    berryYPos = randomNumber.Next(1, screenHeight - 2);
-                }
-            }
-			void snakeBodyPartDraw(int snake_body_part_index)
-			{
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.SetCursorPosition(snakeBodyXPos[snake_body_part_index], snakeBodyYPos[snake_body_part_index]);
-                Console.Write("■");
-            }
-			void snakeBodyPartCollisionCheck(int snake_body_part_index)
-			{
-                if (snakeBodyXPos[snake_body_part_index] == snakeHead.XPos && snakeBodyYPos[snake_body_part_index] == snakeHead.YPos)
-                {
-                    gameOver = true;
-                }
-            }
-            void snakeBodyLoop()
-            {
-                for (int i = 0; i < snakeBodyXPos.Count(); i++)
-                {
-                    snakeBodyPartDraw(i);
-                    snakeBodyPartCollisionCheck(i);
-                }
-            }
-			void berryDraw()
-			{
-                Console.SetCursorPosition(berryXPos, berryYPos);
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.Write("■");
-            }
-			void snakeMoveKeyInput()
-			{
-                actionTimerStartingTime = DateTime.Now;
-                buttonPressed = "no";
-                while (true)
-                {
-                    actionTimerCurrentTime = DateTime.Now;
-                    if (actionTimerCurrentTime.Subtract(actionTimerStartingTime).TotalMilliseconds > 500) { break; }
-                    if (Console.KeyAvailable)
-                    {
-                        ConsoleKeyInfo toets = Console.ReadKey(true);
-                        //Console.WriteLine(toets.Key.ToString());
-                        if (toets.Key.Equals(ConsoleKey.UpArrow) && snake1.snakeMoveDirection != "DOWN" && buttonPressed == "no")
-                        {
-                            snake1.snakeMoveDirection = "UP";
-                            buttonPressed = "yes";
-                        }
-                        if (toets.Key.Equals(ConsoleKey.DownArrow) && snake1.snakeMoveDirection != "UP" && buttonPressed == "no")
-                        {
-                            snake1.snakeMoveDirection = "DOWN";
-                            buttonPressed = "yes";
-                        }
-                        if (toets.Key.Equals(ConsoleKey.LeftArrow) && snake1.snakeMoveDirection != "RIGHT" && buttonPressed == "no")
-                        {
-                            snake1.snakeMoveDirection = "LEFT";
-                            buttonPressed = "yes";
-                        }
-                        if (toets.Key.Equals(ConsoleKey.RightArrow) && snake1.snakeMoveDirection != "LEFT" && buttonPressed == "no")
-                        {
-                            snake1.snakeMoveDirection = "RIGHT";
-                            buttonPressed = "yes";
-                        }
-                    }
-                }
-            }
-            void snakeMoveExecution()
-            {
-                snakeBodyXPos.Add(snake1.XPos);
-                snakeBodyYPos.Add(snake1.YPos);
-                switch (snake1.snakeMoveDirection)
-                {
-                    case "UP":
-                        snake1.YPos--;
-                        break;
-                    case "DOWN":
-                        snake1.YPos++;
-                        break;
-                    case "LEFT":
-                        snake1.XPos--;
-                        break;
-                    case "RIGHT":
-                        snake1.XPos++;
-                        break;
-                }
-
-                if (snakeBodyXPos.Count() > score)
-                {
-                    snakeBodyXPos.RemoveAt(0);
-                    snakeBodyYPos.RemoveAt(0);
-                }
-            }
-            void gameOverScreen()
-            {
-                Console.SetCursorPosition(screenWidth / 5, screenHeight / 2);
-                Console.WriteLine("Game over, Score: " + score);
-                Console.SetCursorPosition(screenWidth / 5, screenHeight / 2 + 1);
-            }
-
-			while (true)
-			{
-				Console.Clear();
-				snakeDeathCheck();
-				mainScreen.createBorders();
-				eatingCheck();
-				snakeBodyLoop();
-				if (gameOver) { break; }
-                
-				berryDraw();
-                snakeMoveKeyInput();
-                snakeMoveExecution();
-			}
-            gameOverScreen();
-		}
-		class Pixel
-		{
-			public int XPos { get; set; }
-			public int YPos { get; set; }
-			public ConsoleColor Color { get; set; }
-
-
-            public Pixel(int xPosition, int yPosition, ConsoleColor pixelColor)
-            {
-                XPos = xPosition;
-                YPos = yPosition;
-                Color = pixelColor;
-            }
-
-            public void draw()
-            {
-                Console.SetCursorPosition(XPos, YPos);
-                Console.ForegroundColor = Color;
-                Console.Write("■");
-            }
-		}
-
-        class Screen
+    class Program
+    {
+        static void Main(string[] args)
         {
-            public int ScreenWidth {  get; set; }
-            public int ScreenHeight { get; set; }
-            public Screen(int screenWidth, int screenHeight) {ScreenWidth = screenWidth; ScreenHeight = screenHeight; }
-            public void screenSetup()
-            {
-                Console.WindowWidth = ScreenWidth;
-                Console.WindowHeight = ScreenHeight;
-                createBorders();
-            }
+            Game game = new Game(32, 16);
+            game.Run();
+        }
+    }
 
-            public void createBorders()
+    class Game
+    {
+        public Screen TheScreen { get; private set; }
+        public Snake TheSnake { get; private set; }
+        public int Score { get; set; }
+        public bool GameOver { get; set; }
+        private Random randomNumber;
+        public Berry berry { get; private set; }
+
+        public Game(int width, int height)
+        {
+            TheScreen = new Screen(this, width, height, ConsoleColor.Cyan, ConsoleColor.Green, ConsoleColor.Red, ConsoleColor.Magenta);
+            TheSnake = new Snake(this);
+            Score = 5;
+            GameOver = false;
+            randomNumber = new Random();
+            berry = new Berry(this);
+        }
+
+        public void GameLogic()
+        {
+            SnakeMoveKeyInput();
+            berry.EatingCheck();
+            TheSnake.SnakeMoveExecution();
+            TheSnake.SnakeDeathCheck();
+        }
+
+        public void Run()
+        {
+            TheScreen.ScreenSetup();
+            while (!GameOver)
             {
-                for (int i = 0; i < ScreenWidth; i++)
+                TheScreen.DrawEverything();
+                GameLogic();
+            }
+            TheScreen.GameOverScreen();
+        }
+
+        private void SnakeMoveKeyInput()
+        {
+            DateTime actionTimerStartingTime = DateTime.Now;
+            string buttonPressed = "no";
+            while (true)
+            {
+                if ((DateTime.Now - actionTimerStartingTime).TotalMilliseconds > 500) break;
+                if (Console.KeyAvailable)
                 {
-                    Console.SetCursorPosition(i, 0);
-                    Console.Write("■");
-                }
-                for (int i = 0; i < ScreenWidth; i++)
-                {
-                    Console.SetCursorPosition(i, ScreenHeight - 1);
-                    Console.Write("■");
-                }
-                for (int i = 0; i < ScreenHeight; i++)
-                {
-                    Console.SetCursorPosition(0, i);
-                    Console.Write("■");
-                }
-                for (int i = 0; i < ScreenHeight; i++)
-                {
-                    Console.SetCursorPosition(ScreenWidth - 1, i);
-                    Console.Write("■");
+                    ConsoleKeyInfo key = Console.ReadKey(true);
+                    TheSnake.ChangeDirection(key, ref buttonPressed);
                 }
             }
         }
+    }
 
-        class Snake
+    class Screen
+    {
+        private Game game;
+        public int ScreenWidth { get; private set; }
+        public int ScreenHeight { get; private set; }
+        private ConsoleColor BorderColor;
+        private ConsoleColor SnakeColor;
+        private ConsoleColor SnakeHeadColor;
+        private ConsoleColor BerryColor;
+
+        public Screen(Game game, int width, int height, ConsoleColor borderColor, ConsoleColor snakeColor, ConsoleColor snakeHeadColor, ConsoleColor berryColor)
         {
-            public int XPos { get; set; }
-            public int YPos { get; set; }
-            public string snakeMoveDirection { get; set; }
-            public Snake(Screen screen)
+            this.game = game;
+            ScreenWidth = width;
+            ScreenHeight = height;
+            BorderColor = borderColor;
+            SnakeColor = snakeColor;
+            SnakeHeadColor = snakeHeadColor;
+            BerryColor = berryColor;
+        }
+
+        public void ScreenSetup()
+        {
+            Console.WindowWidth = ScreenWidth;
+            Console.WindowHeight = ScreenHeight;
+        }
+
+        public void DrawEverything()
+        {
+            Console.Clear();
+            DrawBorder();
+            DrawSnake();
+            DrawBerry();
+        }
+
+        private void DrawBorder()
+        {
+            Console.ForegroundColor = BorderColor;
+            for (int i = 0; i < ScreenWidth; i++)
             {
-                snakeMoveDirection = "RIGHT";
-                XPos = screen.ScreenWidth / 2;
-                YPos = screen.ScreenHeight / 2;
-                Pixel snakeHead = new Pixel(XPos, YPos, ConsoleColor.Red);
+                Console.SetCursorPosition(i, 0);
+                Console.Write("■");
+                Console.SetCursorPosition(i, ScreenHeight - 1);
+                Console.Write("■");
+            }
+            for (int i = 0; i < ScreenHeight; i++)
+            {
+                Console.SetCursorPosition(0, i);
+                Console.Write("■");
+                Console.SetCursorPosition(ScreenWidth - 1, i);
+                Console.Write("■");
             }
         }
 
-        class Berry
+        public void DrawSnake()
         {
-            public Berry() {
+            Console.ForegroundColor = SnakeColor;
+            foreach (var part in game.TheSnake.BodyParts)
+            {
+                Console.SetCursorPosition(part.XPos, part.YPos);
+                Console.Write("■");
+            }
+            Console.ForegroundColor = SnakeHeadColor;
+            Console.SetCursorPosition(game.TheSnake.XPos, game.TheSnake.YPos);
+            Console.Write("■");
+        }
 
+        public void DrawBerry()
+        {
+            Console.SetCursorPosition(game.berry.XPos, game.berry.YPos);
+            Console.ForegroundColor = BerryColor;
+            Console.Write("■");
+        }
+
+        public void GameOverScreen()
+        {
+            Console.SetCursorPosition(ScreenWidth / 5, ScreenHeight / 2);
+            Console.WriteLine("Game over, Score: " + game.Score);
+        }
+    }
+
+    class Snake
+    {
+        private Game game;
+        public int XPos { get; private set; }
+        public int YPos { get; private set; }
+        public string MoveDirection { get; private set; }
+        public List<SnakeBodyPart> BodyParts { get; private set; }
+
+        public Snake(Game game)
+        {
+            this.game = game;
+            MoveDirection = "RIGHT";
+            XPos = game.TheScreen.ScreenWidth / 2;
+            YPos = game.TheScreen.ScreenHeight / 2;
+            BodyParts = new List<SnakeBodyPart>();
+        }
+
+        public void ChangeDirection(ConsoleKeyInfo key, ref string buttonPressed)
+        {
+            if (buttonPressed == "no")
+            {
+                if (key.Key == ConsoleKey.UpArrow && MoveDirection != "DOWN") MoveDirection = "UP";
+                if (key.Key == ConsoleKey.DownArrow && MoveDirection != "UP") MoveDirection = "DOWN";
+                if (key.Key == ConsoleKey.LeftArrow && MoveDirection != "RIGHT") MoveDirection = "LEFT";
+                if (key.Key == ConsoleKey.RightArrow && MoveDirection != "LEFT") MoveDirection = "RIGHT";
+                buttonPressed = "yes";
             }
         }
-	}
+
+        public void SnakeMoveExecution()
+        {
+            BodyParts.Add(new SnakeBodyPart(XPos, YPos));
+            switch (MoveDirection)
+            {
+                case "UP": YPos--; break;
+                case "DOWN": YPos++; break;
+                case "LEFT": XPos--; break;
+                case "RIGHT": XPos++; break;
+            }
+            if (BodyParts.Count > game.Score)
+            {
+                BodyParts.RemoveAt(0);
+            }
+        }
+
+        public void SnakeDeathCheck()
+        {
+            if (XPos == game.TheScreen.ScreenWidth - 1 || XPos == 0 ||
+                YPos == game.TheScreen.ScreenHeight - 1 || YPos == 0)
+            {
+                game.GameOver = true;
+            }
+
+            foreach (var part in BodyParts)
+            {
+                if (XPos == part.XPos && YPos == part.YPos)
+                {
+                    game.GameOver = true;
+                    break;
+                }
+            }
+        }
+    }
+    class SnakeBodyPart
+    {
+        public int XPos { get; set; }
+        public int YPos { get; set; }
+        public SnakeBodyPart(int x, int y)
+        {
+            XPos = x;
+            YPos = y;
+        }
+    }
+    class Berry
+    {
+        private Game game;
+        public int XPos { get; set; }
+        public int YPos { get; set; }
+
+        public Berry(Game game)
+        {
+            this.game = game;
+            SpawnBerry();
+        }
+
+        public void SpawnBerry()
+        {
+            Random random = new Random();
+            XPos = random.Next(1, game.TheScreen.ScreenWidth - 2);
+            YPos = random.Next(1, game.TheScreen.ScreenHeight - 2);
+        }
+
+        public void EatingCheck()
+        {
+            if (XPos == game.TheSnake.XPos && YPos == game.TheSnake.YPos)
+            {
+                game.Score++;
+                SpawnBerry();
+            }
+        }
+    }
 }
-//¦
